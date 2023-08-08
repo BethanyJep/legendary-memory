@@ -1,31 +1,69 @@
 import React, { useState } from 'react';
+import analyzeImage from './azure-image-analysis';
+
+function DisplayResults({ imageUrl, analysisResult }) {
+  // const {captionResult} = analysisResult;
+  
+  return (
+    <div>
+      <h2>Results for </h2>
+      <img src={imageUrl} alt="Analyzed" width="20%" />
+      <h3>Image Caption</h3>
+      <pre>{JSON.stringify(analysisResult, null, 2)}</pre>
+    </div>
+  );
+}
 
 function App() {
   const [imageUrl, setImageUrl] = useState('');
+  const [prompt, setPrompt] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
 
-  function handleImageUrlChange(event) {
+  const handleImageUrlChange = (event) => {
     setImageUrl(event.target.value);
-  }
+  };
 
-  function handleAnalyzeClick() {
-    // TODO: implement analyzeImage function
-    console.log('Analyze Image button clicked');
-  }
+  const handlePromptChange = (event) => {
+    setPrompt(event.target.value);
+  };
 
-  function handleGenerateClick() {
-    // TODO: implement generateImage function
-    console.log('Generate Image button clicked');
-  }
+  const handleImageAnalysis = async () => {
+    setIsLoading(true);
+    try {
+      const result = await analyzeImage(imageUrl);
+      setAnalysisResult(result);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleImageGeneration = () => {
+    // Code to trigger image generation
+  };
+
 
   return (
     <div>
       <h1>Image Analysis and Generation</h1>
-
-      <label htmlFor="image-url">Image URL or prompt:</label>
-      <input type="text" id="image-url" name="image-url" value={imageUrl} onChange={handleImageUrlChange} />
-
-      <button onClick={handleAnalyzeClick}>Analyze Image</button>
-      <button onClick={handleGenerateClick}>Generate Image</button>
+      <label>
+        Image URL:
+        <input type="text" value={imageUrl} onChange={handleImageUrlChange} />
+      </label>
+      <br />
+      <label>
+        Prompt:
+        <input type="text" value={prompt} onChange={handlePromptChange} />
+      </label>
+      <br />
+      <button onClick={handleImageAnalysis}>Analyze Image</button>
+      <button onClick={handleImageGeneration}>Generate Image</button>
+      {isLoading && <p>Processing...</p>}
+      {analysisResult && (
+        <DisplayResults imageUrl={imageUrl} analysisResult={analysisResult} />
+      )}
     </div>
   );
 }
