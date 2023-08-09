@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
 import analyzeImage from './azure-image-analysis';
+import generateImage from './azure-image-generation';
 
-function DisplayResults({ imageUrl, analysisResult }) {
-  // const {captionResult} = analysisResult;
-  
+function DisplayResults({ imageUrl, analysisResult, generatedImageUrl }) {
+  const { captionResult } = analysisResult;
+
   return (
     <div>
-      <h2>Results for </h2>
+      <h2>Results for {imageUrl}</h2>
       <img src={imageUrl} alt="Analyzed" width="20%" />
       <h3>Image Caption</h3>
-      <pre>{JSON.stringify(analysisResult, null, 2)}</pre>
+      <pre>{JSON.stringify(captionResult, null, 2)}</pre>
+      {generatedImageUrl && (
+        <div>
+          <h3>Generated Image</h3>
+          <img src={generatedImageUrl} alt="Generated" width="50%" />
+          <p>Generated Image URL: {generatedImageUrl}</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -19,6 +27,7 @@ function App() {
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState(null);
 
   const handleImageUrlChange = (event) => {
     setImageUrl(event.target.value);
@@ -40,8 +49,16 @@ function App() {
     }
   };
 
-  const handleImageGeneration = () => {
-    // Code to trigger image generation
+  const handleImageGeneration = async () => {
+    setIsLoading(true);
+    try {
+      const url = await generateImage(prompt);
+      setGeneratedImageUrl(url);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -61,7 +78,11 @@ function App() {
       <button onClick={handleImageGeneration}>Generate Image</button>
       {isLoading && <p>Processing...</p>}
       {analysisResult && (
-        <DisplayResults imageUrl={imageUrl} analysisResult={analysisResult} />
+        <DisplayResults
+          imageUrl={imageUrl}
+          analysisResult={analysisResult}
+          generatedImageUrl={generatedImageUrl}
+        />
       )}
     </div>
   );
