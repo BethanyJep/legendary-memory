@@ -24,17 +24,12 @@ function DisplayResults({ imageUrl, analysisResult, generatedImageUrl }) {
 
 function App() {
   const [imageUrl, setImageUrl] = useState('');
-  const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [generatedImageUrl, setGeneratedImageUrl] = useState(null);
 
   const handleImageUrlChange = (event) => {
     setImageUrl(event.target.value);
-  };
-
-  const handlePromptChange = (event) => {
-    setPrompt(event.target.value);
   };
 
   const handleImageAnalysis = async () => {
@@ -52,8 +47,8 @@ function App() {
   const handleImageGeneration = async () => {
     setIsLoading(true);
     try {
-      const url = await generateImage(prompt);
-      setGeneratedImageUrl(url);
+      const result = await generateImage(imageUrl);
+      setGeneratedImageUrl(result);
     } catch (error) {
       console.error(error);
     } finally {
@@ -66,13 +61,8 @@ function App() {
     <div>
       <h1>Image Analysis and Generation</h1>
       <label>
-        Image URL:
+        Image URL or prompt:
         <input type="text" value={imageUrl} onChange={handleImageUrlChange} />
-      </label>
-      <br />
-      <label>
-        Prompt:
-        <input type="text" value={prompt} onChange={handlePromptChange} />
       </label>
       <br />
       <button onClick={handleImageAnalysis}>Analyze Image</button>

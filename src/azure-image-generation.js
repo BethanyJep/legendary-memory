@@ -11,9 +11,9 @@ async function generateImage(prompt) {
     const url = `${apiBase}openai/images/generations:submit?api-version=${apiVersion}`;
     const headers = { "Ocp-Apim-Subscription-Key": apiKey, "Content-Type": "application/json" };
     const body = {
-        "prompt": prompt,
-        "size": "512x512",
-        "n": 1
+        prompt: prompt,
+        size: "512x512",
+        n: 1
     };
     const response = await new Promise((resolve, reject) => {
       request.post({ url: url, headers: headers, json: body }, (error, response, body) => {
