@@ -12,7 +12,7 @@ async function analyzeImage(imageUrl) {
     // };
   
     const response = await fetch(
-      `${endpoint}/computervision/imageanalysis:analyze?features=caption,read&model-version=latest&language=en&api-version=2023-02-01-preview`,
+      `${endpoint}computervision/imageanalysis:analyze?features=caption,read&model-version=latest&language=en&api-version=2023-02-01-preview`,
       {
         method: 'POST',
         headers: {
