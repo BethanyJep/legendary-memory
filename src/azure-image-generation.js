@@ -1,6 +1,8 @@
 // import openai
 // import OpenAIAPI from "react-openai-api";
 
+import OpenAIAPI from 'react-openai-api';
+
 const openai = require('openai');
 openai.apiType = 'azure';
 openai.apiBase = process.env.REACT_APP_OPENAI_ENDPOINT;
@@ -9,7 +11,7 @@ openai.apiKey = process.env.REACT_APP_API_KEY;
 
 async function generateImage(prompt) {
   try {
-    const response = await openai.CreateImageRequestSizeEnum({
+    const response = await openai.createImage({
       prompt: prompt,
       size: '1024x1024',
       n: 1,
