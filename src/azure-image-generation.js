@@ -1,23 +1,56 @@
-// import openai
-// import OpenAIAPI from "react-openai-api";
-
-import OpenAIAPI from 'react-openai-api';
-
-const openai = require('openai');
-openai.apiType = 'azure';
-openai.apiBase = process.env.REACT_APP_OPENAI_ENDPOINT;
-openai.apiVersion = '2023-06-01-preview';
-openai.apiKey = process.env.REACT_APP_API_KEY;
+const request = require('request');
 
 async function generateImage(prompt) {
   try {
-    const response = await openai.createImage({
-      prompt: prompt,
-      size: '1024x1024',
-      n: 1,
+    // Get Azure Image Generation service settings
+    const apiBase = process.env.REACT_APP_OPENAI_ENDPOINT;
+    const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
+    // const apiVersion = process.env.REACT_APP_OPENAI_API_VERSION;
+
+    // Make the API call to generate the image
+    const url = `${apiBase}/openai/images/generations:submit?api-version=2023-06-01-preview`;
+    const headers = { "api-key": apiKey, "Content-Type": "application/json" };
+    const body = {
+        "prompt": prompt,
+        "size": "512x512",
+        "n": 1
+    };
+    const response = await new Promise((resolve, reject) => {
+      request.post({ url: url, headers: headers, json: body }, (error, response, body) => {
+        if (error) {
+          reject(error);
+        } else if (response.statusCode !== 202) {
+          reject(`Failed to submit job: ${response.statusCode} ${response.statusMessage}`);
+        } else {
+          resolve(response);
+        }
+      });
     });
 
-    const imageUrl = response.data.data[0].url;
+    // Get the operation-location URL for the callback
+    const operationLocation = response.headers['operation-location'];
+
+    // Poll the callback URL until the job has succeeded
+    let status = "";
+    while (status !== "succeeded") {
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const response = await new Promise((resolve, reject) => {
+        request.get({ url: operationLocation, headers: headers, json: true }, (error, response, body) => {
+          if (error) {
+            reject(error);
+          } else if (response.statusCode !== 200) {
+            reject(`Failed to poll job status: ${response.statusCode} ${response.statusMessage}`);
+          } else {
+            resolve(response);
+          }
+        });
+      });
+      status = response.body.status;
+    }
+
+    // Get the URL of the generated image
+    const imageUrl = response.data[0].url;
+
     return imageUrl;
   } catch (error) {
     console.error(error);
@@ -26,6 +59,3 @@ async function generateImage(prompt) {
 }
 
 export default generateImage;
-// const prompt = 'a kitten sitting on grass';
-// const imageUrl = await generateImage(prompt);
-// console.log(imageUrl);
